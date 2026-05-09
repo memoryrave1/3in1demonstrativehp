@@ -80,7 +80,7 @@
       padding:4px 0 8px
     }
     #startScreen .center-stack,#resultScreen .center-stack{transform:translate(38px,-20px)}
-    #screen1 .center-stack{padding-top:18px}
+    #screen1 .center-stack{padding-top:0}
     .start-card,.result-card{
       width:min(800px,92vw);
       padding:clamp(26px,4vw,42px);
@@ -203,7 +203,6 @@
       justify-content:center;
       overflow:visible
     }
-    #screen1 .prompt-card{margin-top:16px;margin-bottom:4px}
     .image-frame{
       width:min(420px,48vw);
       aspect-ratio:1/1;
@@ -237,7 +236,8 @@
       justify-self:center;
       width:100%
     }
-    #screen1 .img-btn{max-width:470px}
+    #screen1 .image-options{width:min(900px,100%);gap:14px}
+    #screen1 .img-btn{max-width:420px}
     .text-btn{
       min-height:82px;
       padding:14px 16px;
@@ -267,7 +267,7 @@
       font-size:18px;
       text-shadow:0 2px 8px rgba(0,0,0,.35)
     }
-    #screen1 .message{margin-top:-4px;transform:translateY(-6px)}
+    #screen1 .message{margin-top:-10px}
     .message.good{color:#d7f0aa}
     .message.bad{color:#f0bbbb}
     .answer-input{
@@ -353,7 +353,7 @@
       .score-box,.small-magic-btn{width:100%;min-width:0}
       .image-frame{width:min(320px,68vw)}
       .img-btn{max-width:320px}
-      #screen1 .img-btn{max-width:320px}
+      #screen1 .img-btn{max-width:300px}
       #startScreen .center-stack,#resultScreen .center-stack{transform:none}
     }
     @media (max-width:600px){
