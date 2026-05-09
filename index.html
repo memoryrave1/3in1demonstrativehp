@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Demonstrative Pronouns</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Underdog&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --gold-light:#ffdd92;
+      --text:#fff8ea;
+      --green1:rgba(162,197,98,.95);
+      --green2:rgba(121,153,61,.82);
+      --red1:rgba(194,75,75,.98);
+      --red2:rgba(132,34,34,.82);
+      --shadow:0 12px 32px rgba(0,0,0,.32);
+      --vh:1vh;
+      --top-h:76px;
+      --nav-w:78px;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;font-family:"Underdog",system-ui,sans-serif}
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#140d07}
+    body{color:var(--text);position:relative;background:url("images/bg.png") center center/cover no-repeat}
+    body::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 20% 30%,rgba(255,203,100,.08),transparent 24%),
+        radial-gradient(circle at 72% 22%,rgba(255,220,140,.08),transparent 22%),
+        linear-gradient(180deg,rgba(15,8,4,.10),rgba(15,8,4,.34)),
+        rgba(0,0,0,.12);
+      backdrop-filter:blur(3px);
+      pointer-events:none
+    }
+    .app{position:relative;z-index:1;width:100%;height:calc(var(--vh,1vh)*100);overflow:hidden;padding:10px}
+    .game{
+      width:min(1440px,100%);
+      height:100%;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:1fr var(--nav-w);
+      grid-template-rows:var(--top-h) 1fr;
+      gap:10px;
+      overflow:hidden
+    }
+    .top-row{
+      grid-column:1/2;
+      grid-row:1/2;
+      min-height:var(--top-h);
+      height:var(--top-h);
+      display:grid;
+      grid-template-columns:1fr 240px 240px;
+      align-items:center;
+      gap:12px;
+      overflow:hidden
+    }
+    .top-left,.top-center,.top-right{display:flex;align-items:center;height:100%}
+    .top-left{min-width:0;overflow:hidden;padding-left:4px}
+    .top-center,.top-right{justify-content:center}
+    .main-area{grid-column:1/2;grid-row:2/3;min-width:0;min-height:0;overflow:hidden;position:relative}
+    .side-nav{grid-column:2/3;grid-row:1/3;display:flex;align-items:center;justify-content:center;min-height:0}
+    .side-nav-inner{display:flex;flex-direction:column;align-items:center;gap:14px}
+    .screen{display:none;width:100%;height:100%;min-height:0;overflow:hidden}
+    .screen.active{display:flex;justify-content:center;align-items:center;animation:fadeIn .25s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .center-stack{
+      width:100%;
+      height:100%;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      overflow:visible;
+      position:relative;
+      padding:8px 0 12px
+    }
+    #startScreen .center-stack,#resultScreen .center-stack{transform:translate(38px,-20px)}
+    .start-card,.result-card{
+      width:min(800px,92vw);
+      padding:clamp(26px,4vw,42px);
+      border-radius:28px;
+      background:rgba(24,17,10,.60);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:var(--shadow);
+      text-align:center;
+      backdrop-filter:blur(10px)
+    }
+    .game-title{
+      margin:0 0 18px;
+      font-size:clamp(34px,5vw,66px);
+      color:var(--gold-light);
+      line-height:1.08;
+      text-shadow:0 4px 14px rgba(0,0,0,.28)
+    }
+    .heart-row{display:flex;align-items:center;gap:8px;min-height:44px;overflow:hidden}
+    .heart{
+      line-height:1;
+      font-size:clamp(24px,2.2vw,32px);
+      filter:drop-shadow(0 3px 8px rgba(0,0,0,.35));
+      text-shadow:0 0 6px rgba(255,45,45,.45),0 0 12px rgba(255,45,45,.30)
+    }
+    .heart.lost{opacity:.18;filter:grayscale(1);text-shadow:none}
+    .top-box{
+      width:240px;
+      min-width:240px;
+      height:56px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:8px 14px;
+      border-radius:16px;
+      background:rgba(67,43,20,.84);
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(8px);
+      white-space:nowrap
+    }
+    .gone{visibility:hidden!important;pointer-events:none!important}
+    .timer-icon{
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      background:radial-gradient(circle at 30% 30%,#e2c58e,#7b5c31 70%);
+      box-shadow:inset 0 0 0 2px rgba(255,255,255,.20);
+      position:relative;
+      flex:0 0 auto
+    }
+    .timer-icon::before,.timer-icon::after{
+      content:"";
+      position:absolute;
+      left:50%;
+      top:50%;
+      background:#2a2117;
+      transform-origin:bottom center;
+      border-radius:2px
+    }
+    .timer-icon::before{width:3px;height:12px;transform:translate(-50%,-100%) rotate(25deg)}
+    .timer-icon::after{width:2px;height:15px;transform:translate(-50%,-100%) rotate(120deg)}
+    .timer-text{font-size:clamp(24px,2vw,34px);line-height:1;letter-spacing:1px;min-width:88px;text-align:left}
+    .timer-settings span{font-size:14px;opacity:.95}
+    .switch{position:relative;width:54px;height:30px;flex:0 0 auto}
+    .switch input{display:none}
+    .slider{position:absolute;inset:0;border-radius:999px;background:rgba(255,255,255,.18);cursor:pointer;transition:.25s ease}
+    .slider::before{
+      content:"";
+      position:absolute;
+      width:22px;
+      height:22px;
+      top:4px;
+      left:4px;
+      border-radius:50%;
+      background:#fff;
+      transition:.25s ease;
+      box-shadow:0 4px 10px rgba(0,0,0,.24)
+    }
+    .switch input:checked + .slider{background:linear-gradient(90deg,#f2bc54,#ffd98e)}
+    .switch input:checked + .slider::before{transform:translateX(24px)}
+    .time-select{
+      height:34px;
+      width:84px;
+      border-radius:10px;
+      border:none;
+      outline:none;
+      padding:0 10px;
+      font-size:14px;
+      background:rgba(255,255,255,.93);
+      color:#1a1a1a
+    }
+    .magic-btn,.small-magic-btn,.nav-btn{cursor:pointer}
+    .magic-btn{
+      border:1px solid rgba(255,227,169,.25);
+      border-radius:999px;
+      background:linear-gradient(180deg,rgba(255,221,155,1),rgba(235,176,72,1));
+      color:#38230e;
+      box-shadow:0 10px 24px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.55),0 0 0 1px rgba(120,82,24,.18),0 0 18px rgba(255,206,108,.16);
+      transition:transform .18s ease,filter .18s ease;
+      font-size:clamp(22px,2.5vw,30px);
+      min-width:190px;
+      min-height:60px;
+      padding:12px 28px
+    }
+    .magic-btn:hover,.small-magic-btn:hover,.nav-btn:hover{transform:translateY(-2px);filter:brightness(1.04)}
+    .prompt-card{
+      width:min(980px,100%);
+      min-height:88px;
+      padding:14px 26px;
+      border-radius:18px;
+      background:rgba(255,255,255,.93);
+      color:#1b1710;
+      text-align:center;
+      box-shadow:var(--shadow);
+      font-size:clamp(24px,3.2vw,50px);
+      line-height:1.2;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:visible
+    }
+    .image-frame{
+      width:min(420px,48vw);
+      aspect-ratio:1/1;
+      background:rgba(255,255,255,.92);
+      border-radius:18px;
+      padding:12px;
+      box-shadow:var(--shadow);
+      overflow:visible
+    }
+    .image-frame img,.img-btn img{width:100%;height:100%;object-fit:cover;border-radius:12px;display:block}
+    .image-options,.text-options{
+      width:min(980px,100%);
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+      align-items:stretch
+    }
+    .img-btn,.text-btn{
+      position:relative;
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:var(--shadow),0 0 14px rgba(255,214,120,.05);
+      transition:transform .18s ease,background .18s ease,box-shadow .18s ease,filter .18s ease
+    }
+    .img-btn:hover,.text-btn:hover{transform:translateY(-3px)}
+    .img-btn{
+      background:rgba(255,255,255,.88);
+      border-radius:18px;
+      padding:8px;
+      aspect-ratio:1/1;
+      max-width:560px;
+      justify-self:center;
+      width:100%
+    }
+    .text-btn{
+      min-height:82px;
+      padding:14px 16px;
+      border-radius:18px;
+      background:linear-gradient(180deg,rgba(55,64,34,.76),rgba(39,47,25,.82));
+      color:var(--gold-light);
+      font-size:clamp(18px,2.2vw,30px);
+      line-height:1.12;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      word-break:break-word;
+      overflow:hidden
+    }
+    .correct{
+      box-shadow:0 0 0 2px rgba(175,208,107,.95),0 0 14px var(--green1),0 0 28px var(--green2),0 0 42px rgba(121,153,61,.44),var(--shadow);
+      filter:brightness(1.04)
+    }
+    .wrong{
+      box-shadow:0 0 0 2px rgba(205,97,97,.95),0 0 14px var(--red1),0 0 28px var(--red2),0 0 42px rgba(132,34,34,.42),var(--shadow);
+      filter:brightness(1.03)
+    }
+    .message{min-height:24px;text-align:center;font-size:18px;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+    .message.good{color:#d7f0aa}
+    .message.bad{color:#f0bbbb}
+    .answer-input{
+      width:min(760px,100%);
+      height:64px;
+      border:2px solid rgba(255,255,255,.16);
+      border-radius:18px;
+      padding:0 18px;
+      outline:none;
+      background:rgba(245,246,251,.95);
+      color:#1c2230;
+      font-size:clamp(20px,2.4vw,28px);
+      box-shadow:var(--shadow);
+      transition:box-shadow .2s ease,border-color .2s ease
+    }
+    .answer-input.correct{
+      border-color:rgba(175,208,107,.98);
+      box-shadow:0 0 0 3px rgba(175,208,107,.18),0 0 18px var(--green1),0 0 30px rgba(121,153,61,.24),var(--shadow)
+    }
+    .answer-input.wrong{
+      border-color:rgba(205,97,97,.98);
+      box-shadow:0 0 0 3px rgba(205,97,97,.18),0 0 18px var(--red1),0 0 30px rgba(132,34,34,.24),var(--shadow)
+    }
+    .controls-row{
+      width:min(900px,100%);
+      display:grid;
+      grid-template-columns:140px 1fr 140px 140px;
+      gap:12px;
+      align-items:center
+    }
+    .score-box,.small-magic-btn{
+      width:140px;
+      min-width:140px;
+      height:52px;
+      padding:0 16px;
+      border-radius:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      box-shadow:var(--shadow)
+    }
+    .score-box{background:rgba(67,43,20,.84);border:1px solid rgba(255,255,255,.08);color:var(--text)}
+    .small-magic-btn{border:1px solid rgba(255,255,255,.12)}
+    .ok-btn{background:linear-gradient(180deg,rgba(239,182,75,1),rgba(198,132,36,1));color:#2d1d0a}
+    .skip-btn{background:linear-gradient(180deg,rgba(110,161,183,.95),rgba(70,122,146,.95));color:#fff8ea}
+    .nav-btn{
+      width:56px;
+      height:56px;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,.12);
+      background:radial-gradient(circle at 30% 30%,rgba(255,221,155,.95),rgba(225,160,64,.95));
+      color:#3a240f;
+      box-shadow:var(--shadow),0 0 18px rgba(255,206,108,.14);
+      font-size:26px;
+      display:flex;
+      align-items:center;
+      justify-content:center
+    }
+    .nav-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;filter:none}
+    .fireworks{position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden}
+    .burst{position:absolute;width:12px;height:12px;left:50%;top:50%}
+    .particle{
+      position:absolute;
+      left:0;
+      top:0;
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:radial-gradient(circle,#fff4c7 0%,#ffd76a 45%,#c89b34 100%);
+      box-shadow:0 0 10px rgba(255,215,100,.65);
+      animation:explode 900ms ease-out forwards
+    }
+    @keyframes explode{0%{transform:translate(0,0) scale(.4);opacity:1}100%{transform:translate(var(--x),var(--y)) scale(1.1);opacity:0}}
+    @media (max-width:860px){
+      .game{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
+      .top-row{grid-column:1/2;grid-row:1/2;grid-template-columns:1fr;height:auto;min-height:auto;justify-items:center}
+      .main-area{grid-column:1/2;grid-row:2/3}
+      .side-nav{grid-column:1/2;grid-row:3/4}
+      .side-nav-inner{flex-direction:row}
+      .image-options,.text-options{grid-template-columns:1fr;width:min(520px,100%)}
+      .controls-row{grid-template-columns:1fr 1fr;width:min(420px,100%)}
+      .score-box,.small-magic-btn{width:100%;min-width:0}
+      .image-frame{width:min(320px,68vw)}
+      .img-btn{max-width:320px}
+      #startScreen .center-stack,#resultScreen .center-stack{transform:none}
+    }
+    @media (max-width:600px){
+      .app{padding:8px}
+      .prompt-card{min-height:84px;font-size:clamp(20px,5.8vw,30px);padding:14px 18px}
+      .text-btn{min-height:74px;font-size:clamp(16px,4.5vw,22px)}
+      .answer-input{height:58px;font-size:20px}
+      .nav-btn{width:50px;height:50px}
+      .top-box{height:50px;width:220px;min-width:220px}
+      .timer-text{font-size:22px}
+      .timer-icon{width:34px;height:34px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="game">
+      <div class="top-row">
+        <div class="top-left" id="topLeft"></div>
+        <div class="top-center">
+          <div class="top-box gone" id="timerBox">
+            <div class="timer-icon"></div>
+            <div class="timer-text" id="timerText">01:00</div>
+          </div>
+        </div>
+        <div class="top-right">
+          <div class="top-box gone" id="timerSettings">
+            <span>Timer</span>
+            <label class="switch">
+              <input type="checkbox" id="timerToggle">
+              <span class="slider"></span>
+            </label>
+            <select id="timerSelect" class="time-select">
+              <option value="1">1 min</option>
+              <option value="2">2 min</option>
+              <option value="3">3 min</option>
+              <option value="4">4 min</option>
+              <option value="5">5 min</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="main-area">
+        <section id="startScreen" class="screen active">
+          <div class="center-stack">
+            <div class="start-card">
+              <h1 class="game-title">Demonstrative Pronouns</h1>
+              <button id="playBtn" class="magic-btn">Play</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="screen1" class="screen">
+          <div class="center-stack">
+            <div class="prompt-card" id="slide1Prompt"></div>
+            <div class="image-options">
+              <button class="img-btn" id="slide1ChoiceA"></button>
+              <button class="img-btn" id="slide1ChoiceB"></button>
+            </div>
+            <div class="message" id="slide1Message"></div>
+          </div>
+        </section>
+
+        <section id="screen2" class="screen">
+          <div class="center-stack">
+            <div class="image-frame">
+              <img id="slide2Image" src="" alt="question image">
+            </div>
+            <div class="text-options">
+              <button class="text-btn" id="slide2ChoiceA"></button>
+              <button class="text-btn" id="slide2ChoiceB"></button>
+            </div>
+            <div class="message" id="slide2Message"></div>
+          </div>
+        </section>
+
+        <section id="screen3" class="screen">
+          <div class="center-stack">
+            <div class="image-frame">
+              <img id="slide3Image" src="" alt="question image">
+            </div>
+            <input id="answerInput" class="answer-input" type="text" autocomplete="off" placeholder="Type your answer..." />
+            <div class="controls-row">
+              <div class="score-box">Score: <span id="scoreValue" style="margin-left:6px;">0</span></div>
+              <div></div>
+              <button id="submitAnswer" class="small-magic-btn ok-btn">OK</button>
+              <button id="skipQuestion" class="small-magic-btn skip-btn">Skip</button>
+            </div>
+            <div class="message" id="slide3Message"></div>
+          </div>
+        </section>
+
+        <section id="resultScreen" class="screen">
+          <div class="center-stack">
+            <div class="result-card">
+              <h1 class="game-title" id="resultTitle">Completed!</h1>
+              <button id="resultBtn" class="magic-btn">Try again</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="side-nav">
+        <div class="side-nav-inner">
+          <button id="prevBtn" class="nav-btn">˄</button>
+          <button id="nextBtn" class="nav-btn">˅</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="fireworks" class="fireworks"></div>
+
+  <audio id="soundCorrect" preload="auto" src="sounds/correct.mp3"></audio>
+  <audio id="soundWrong" preload="auto" src="sounds/wrong.mp3"></audio>
+  <audio id="soundClick" preload="auto" src="sounds/click.mp3"></audio>
+  <audio id="soundGameOver" preload="auto" src="sounds/gameover.mp3"></audio>
+  <audio id="soundWin" preload="auto" src="sounds/win.mp3"></audio>
+
+  <script>
+    const D={
+      images:{
+        "1prod":"images/1.png","2prod":"images/2.png","3prod":"images/3.png","4prod":"images/4.png",
+        "5prod":"images/5.png","6prod":"images/6.png","7prod":"images/7.png","8prod":"images/8.png"
+      },
+      s1:[
+        {text:"___ my cat.",correct:"1prod",wrongPool:["2prod","3prod","4prod","5prod","6prod","7prod","8prod"]},
+        {text:"___ a ghost.",correct:"2prod",wrongPool:["1prod","3prod","4prod","5prod","6prod","7prod","8prod"]},
+        {text:"___ chocolate frogs.",correct:"3prod",wrongPool:["1prod","2prod","4prod","5prod","6prod","7prod","8prod"]},
+        {text:"___ dementors.",correct:"4prod",wrongPool:["1prod","2prod","3prod","5prod","6prod","7prod","8prod"]},
+        {text:"___ an egg.",correct:"5prod",wrongPool:["1prod","2prod","3prod","4prod","6prod","7prod","8prod"]},
+        {text:"___ dragons.",correct:"6prod",wrongPool:["1prod","2prod","3prod","4prod","5prod","7prod","8prod"]},
+        {text:"___ spiders.",correct:"7prod",wrongPool:["1prod","2prod","3prod","4prod","5prod","6prod","8prod"]},
+        {text:"___ a dog.",correct:"8prod",wrongPool:["1prod","2prod","3prod","4prod","5prod","6prod","7prod"]}
+      ],
+      s2:[
+        {id:"1prod",correct:"This is my cat.",wrongPool:["That is a ghost.","These are chocolate frogs.","Those are dementors.","This is an egg.","Those are dragons.","These are spiders.","That is a dog."]},
+        {id:"2prod",correct:"That is a ghost.",wrongPool:["This is my cat.","These are chocolate frogs.","Those are dementors.","This is an egg.","Those are dragons.","These are spiders.","That is a dog."]},
+        {id:"3prod",correct:"These are chocolate frogs.",wrongPool:["That is a ghost.","This is my cat.","Those are dementors.","This is an egg.","Those are dragons.","These are spiders.","That is a dog."]},
+        {id:"4prod",correct:"Those are dementors.",wrongPool:["That is a ghost.","These are chocolate frogs.","This is my cat.","This is an egg.","Those are dragons.","These are spiders.","That is a dog."]},
+        {id:"5prod",correct:"This is an egg.",wrongPool:["That is a ghost.","These are chocolate frogs.","Those are dementors.","This is my cat.","Those are dragons.","These are spiders.","That is a dog."]},
+        {id:"6prod",correct:"Those are dragons.",wrongPool:["That is a ghost.","These are chocolate frogs.","Those are dementors.","This is an egg.","This is my cat.","These are spiders.","That is a dog."]},
+        {id:"7prod",correct:"These are spiders.",wrongPool:["That is a ghost.","These are chocolate frogs.","Those are dementors.","This is an egg.","Those are dragons.","That is a dog.","This is my cat."]},
+        {id:"8prod",correct:"That is a dog.",wrongPool:["That is a ghost.","These are chocolate frogs.","Those are dementors.","This is an egg.","Those are dragons.","This is my cat.","These are spiders."]}
+      ],
+      s3:[
+        {id:"1prod",answer:"This"},{id:"2prod",answer:"That"},{id:"3prod",answer:"These"},{id:"4prod",answer:"Those"},
+        {id:"5prod",answer:"This"},{id:"6prod",answer:"Those"},{id:"7prod",answer:"These"},{id:"8prod",answer:"That"}
+      ]
+    };
+
+    let state={
+      current:"start",
+      failed:"screen1",
+      timerEnabled:false,
+      timerSeconds:60,
+      timerInterval:null,
+      s1:[],s2:[],s3:[],
+      i1:0,i2:0,i3:0,
+      m1:0,m2:0,m3:0,
+      score:0
+    };
+
+    const $=id=>document.getElementById(id);
+    const el={
+      start:$("startScreen"),screen1:$("screen1"),screen2:$("screen2"),screen3:$("screen3"),result:$("resultScreen"),
+      topLeft:$("topLeft"),timerBox:$("timerBox"),timerText:$("timerText"),timerSettings:$("timerSettings"),
+      timerToggle:$("timerToggle"),timerSelect:$("timerSelect"),playBtn:$("playBtn"),
+      s1p:$("slide1Prompt"),s1a:$("slide1ChoiceA"),s1b:$("slide1ChoiceB"),s1m:$("slide1Message"),
+      s2i:$("slide2Image"),s2a:$("slide2ChoiceA"),s2b:$("slide2ChoiceB"),s2m:$("slide2Message"),
+      s3i:$("slide3Image"),input:$("answerInput"),ok:$("submitAnswer"),skip:$("skipQuestion"),score:$("scoreValue"),s3m:$("slide3Message"),
+      resultTitle:$("resultTitle"),resultBtn:$("resultBtn"),prev:$("prevBtn"),next:$("nextBtn"),fireworks:$("fireworks"),
+      aCorrect:$("soundCorrect"),aWrong:$("soundWrong"),aClick:$("soundClick"),aOver:$("soundGameOver"),aWin:$("soundWin")
+    };
+
+    const setVH=()=>document.documentElement.style.setProperty("--vh",`${window.innerHeight*.01}px`);
+    const shuffle=a=>[...a].sort(()=>Math.random()-.5);
+    const rand=a=>a[Math.floor(Math.random()*a.length)];
+    const norm=s=>s.trim().toLowerCase().replace(/\s+/g," ");
+    const sound=a=>{try{a.currentTime=0;a.play()}catch(e){}};
+    const time=t=>`${String(Math.floor(t/60)).padStart(2,"0")}:${String(t%60).padStart(2,"0")}`;
+    const hearts=n=>`<div class="heart-row">${Array.from({length:3},(_,i)=>`<span class="heart ${i>=3-n?"lost":""}">❤️</span>`).join("")}</div>`;
+    const qMap={
+      screen1:{key:"s1",idx:"i1",mist:"m1"},
+      screen2:{key:"s2",idx:"i2",mist:"m2"},
+      screen3:{key:"s3",idx:"i3",mist:"m3"}
+    };
+
+    function setScreen(name){
+      state.current=name;
+      [el.start,el.screen1,el.screen2,el.screen3,el.result].forEach(x=>x.classList.remove("active"));
+      ({start:el.start,screen1:el.screen1,screen2:el.screen2,screen3:el.screen3,result:el.result})[name].classList.add("active");
+      renderTopLeft();
+      renderNav();
+      updateTimerUI();
+    }
+
+    function renderTopLeft(){
+      const map={screen1:state.m1,screen2:state.m2,screen3:state.m3};
+      el.topLeft.innerHTML=map[state.current]!=null?hearts(map[state.current]):"";
+    }
+
+    function renderNav(){
+      const game=["screen1","screen2","screen3"].includes(state.current);
+      el.prev.classList.toggle("gone",!game&&state.current!=="result");
+      el.next.classList.toggle("gone",!game&&state.current!=="result");
+      if(state.current==="start"||state.current==="result"){
+        el.prev.classList.add("gone");
+        el.next.classList.add("gone");
+        return;
+      }
+      el.prev.classList.remove("gone");
+      el.prev.disabled=state.current==="screen1";
+      if(state.current==="screen3") el.next.classList.add("gone");
+      else el.next.classList.remove("gone");
+    }
+
+    function updateTimerUI(){
+      const game=["screen1","screen2","screen3"].includes(state.current);
+      if(!game){
+        el.timerBox.classList.add("gone");
+        el.timerSettings.classList.add("gone");
+        return;
+      }
+      el.timerSettings.classList.remove("gone");
+      el.timerBox.classList.toggle("gone",!state.timerEnabled);
+      el.timerText.textContent=time(state.timerSeconds);
+    }
+
+    function resetTimerState(){
+      clearInterval(state.timerInterval);
+      state.timerEnabled=false;
+      el.timerToggle.checked=false;
+      state.timerSeconds=+el.timerSelect.value*60;
+      updateTimerUI();
+    }
+
+    function startTimer(){
+      clearInterval(state.timerInterval);
+      if(!state.timerEnabled) return updateTimerUI();
+      updateTimerUI();
+      state.timerInterval=setInterval(()=>{
+        state.timerSeconds--;
+        el.timerText.textContent=time(Math.max(state.timerSeconds,0));
+        if(state.timerSeconds<=0){
+          clearInterval(state.timerInterval);
+          state.failed=state.current;
+          showResult("Time is over");
+        }
+      },1000);
+    }
+
+    function createBurst(x,y){
+      const b=document.createElement("div");
+      b.className="burst";
+      b.style.left=`${x}%`;
+      b.style.top=`${y}%`;
+      for(let i=0;i<18;i++){
+        const p=document.createElement("div");
+        p.className="particle";
+        const a=Math.PI*2*i/18,r=40+Math.random()*70;
+        p.style.setProperty("--x",Math.cos(a)*r+"px");
+        p.style.setProperty("--y",Math.sin(a)*r+"px");
+        p.style.animationDelay=`${Math.random()*80}ms`;
+        b.appendChild(p);
+      }
+      el.fireworks.appendChild(b);
+      setTimeout(()=>b.remove(),1200);
+    }
+
+    function fireworks(){
+      createBurst(25,35);
+      setTimeout(()=>createBurst(50,28),120);
+      setTimeout(()=>createBurst(72,36),240);
+      setTimeout(()=>createBurst(38,55),360);
+      setTimeout(()=>createBurst(62,58),480);
+    }
+
+    function buildGame(){
+      state.s1=shuffle(D.s1);
+      state.s2=shuffle(D.s2);
+      state.s3=shuffle(D.s3);
+      state.i1=state.i2=state.i3=0;
+      state.m1=state.m2=state.m3=0;
+      state.score=0;
+      el.s1m.textContent=el.s2m.textContent=el.s3m.textContent="";
+      el.input.value="";
+      el.input.classList.remove("correct","wrong");
+      el.score.textContent="0";
+      render1();
+      render2();
+      render3();
+      resetTimerState();
+    }
+
+    function setMessage(node,text,type=""){
+      node.textContent=text;
+      node.className=`message${type?` ${type}`:""}`;
+    }
+
+    function pairOptions(correct,pool){
+      return shuffle([correct,rand(pool)]);
+    }
+
+    function markCorrect(buttons,isCorrect){
+      buttons.forEach((b,i)=>{if(isCorrect(i))b.classList.add("correct")});
+    }
+
+    function render1(){
+      const q=state.s1[state.i1];
+      if(!q) return;
+      renderTopLeft();
+      setMessage(el.s1m,"");
+      el.s1p.textContent=q.text;
+      const opts=pairOptions(q.correct,q.wrongPool),btns=[el.s1a,el.s1b];
+      btns.forEach((btn,i)=>{
+        btn.className="img-btn";
+        btn.innerHTML=`<img src="${D.images[opts[i]]}" alt="">`;
+        btn.onclick=()=>handleChoice({
+          ok:opts[i]===q.correct,
+          btn,
+          btns,
+          msg:el.s1m,
+          mist:"m1",
+          onFail:"screen1",
+          correctCheck:j=>opts[j]===q.correct,
+          next:()=>++state.i1<state.s1.length?render1():(fireworks(),setTimeout(()=>goTo("screen2",render2),700))
+        });
+      });
+    }
+
+    function render2(){
+      const q=state.s2[state.i2];
+      if(!q) return;
+      renderTopLeft();
+      setMessage(el.s2m,"");
+      el.s2i.src=D.images[q.id];
+      const opts=pairOptions(q.correct,q.wrongPool),btns=[el.s2a,el.s2b];
+      btns.forEach((btn,i)=>{
+        btn.className="text-btn";
+        btn.textContent=opts[i];
+        btn.onclick=()=>handleChoice({
+          ok:opts[i]===q.correct,
+          btn,
+          btns,
+          msg:el.s2m,
+          mist:"m2",
+          onFail:"screen2",
+          correctCheck:j=>opts[j]===q.correct,
+          next:()=>++state.i2<state.s2.length?render2():(fireworks(),setTimeout(()=>goTo("screen3",render3),700))
+        });
+      });
+    }
+
+    function render3(){
+      const q=state.s3[state.i3];
+      renderTopLeft();
+      el.score.textContent=state.score;
+      if(!q){
+        sound(el.aWin);
+        fireworks();
+        return setTimeout(()=>showResult("Completed!"),700);
+      }
+      el.s3i.src=D.images[q.id];
+      el.input.value="";
+      el.input.classList.remove("correct","wrong");
+      setMessage(el.s3m,"");
+      setTimeout(()=>el.input.focus(),100);
+    }
+
+    function handleChoice({ok,btn,btns,msg,mist,onFail,correctCheck,next}){
+      btns.forEach(b=>b.onclick=null);
+      if(ok){
+        sound(el.aCorrect);
+        btn.classList.add("correct");
+        setMessage(msg,"Correct!","good");
+      }else{
+        sound(el.aWrong);
+        btn.classList.add("wrong");
+        state[mist]++;
+        renderTopLeft();
+        setMessage(msg,"Wrong!","bad");
+        markCorrect(btns,correctCheck);
+        if(state[mist]>=3){
+          state.failed=onFail;
+          return setTimeout(()=>{sound(el.aOver);showResult("Game Over")},700);
+        }
+      }
+      setTimeout(next,700);
+    }
+
+    function check3(){
+      const q=state.s3[state.i3],user=norm(el.input.value);
+      if(!q||!user) return;
+      el.input.classList.remove("correct","wrong");
+      if(user===norm(q.answer)){
+        sound(el.aCorrect);
+        state.score+=50;
+        el.score.textContent=state.score;
+        el.input.classList.add("correct");
+        setMessage(el.s3m,"Correct! +50","good");
+        setTimeout(()=>{state.i3++;render3()},650);
+      }else{
+        sound(el.aWrong);
+        state.score-=10;
+        state.m3++;
+        renderTopLeft();
+        el.score.textContent=state.score;
+        el.input.classList.add("wrong");
+        setMessage(el.s3m,"Wrong! -10","bad");
+        if(state.m3>=3){
+          state.failed="screen3";
+          setTimeout(()=>{sound(el.aOver);showResult("Game Over")},700);
+        }
+      }
+    }
+
+    function skip3(){
+      sound(el.aClick);
+      el.input.classList.remove("correct","wrong");
+      state.i3++;
+      render3();
+    }
+
+    function showResult(title){
+      clearInterval(state.timerInterval);
+      el.resultTitle.textContent=title;
+      el.resultBtn.textContent=title==="Completed!"?"Play again":"Try again";
+      setScreen("result");
+    }
+
+    function goTo(screen,render){
+      render();
+      setScreen(screen);
+      resetTimerState();
+    }
+
+    function startGame(){
+      sound(el.aClick);
+      buildGame();
+      state.failed="screen1";
+      setScreen("screen1");
+    }
+
+    function retryFailed(resetMist=true){
+      const map={
+        screen1:["m1",render1],
+        screen2:["m2",render2],
+        screen3:["m3",()=>{el.input.classList.remove("correct","wrong");render3()}]
+      };
+      const [mist,render]=map[state.failed]||[];
+      if(resetMist&&mist) state[mist]=0;
+      if(render) goTo(state.failed,render);
+    }
+
+    function prev(){
+      sound(el.aClick);
+      if(state.current==="screen2") return goTo("screen1",render1);
+      if(state.current==="screen3") return goTo("screen2",render2);
+      if(state.current==="result"){
+        if(el.resultTitle.textContent==="Completed!") return setScreen("start");
+        return retryFailed(false);
+      }
+    }
+
+    function next(){
+      sound(el.aClick);
+      if(state.current==="screen1") return goTo("screen2",render2);
+      if(state.current==="screen2") return goTo("screen3",render3);
+    }
+
+    function resultAction(){
+      sound(el.aClick);
+      if(el.resultTitle.textContent==="Completed!"){
+        buildGame();
+        return setScreen("start");
+      }
+      retryFailed(true);
+    }
+
+    setVH();
+    window.addEventListener("resize",setVH);
+    window.addEventListener("orientationchange",setVH);
+
+    el.timerToggle.addEventListener("change",()=>{
+      state.timerEnabled=el.timerToggle.checked;
+      state.timerSeconds=+el.timerSelect.value*60;
+      state.timerEnabled?startTimer():(clearInterval(state.timerInterval),updateTimerUI());
+    });
+
+    el.timerSelect.addEventListener("change",()=>{
+      state.timerSeconds=+el.timerSelect.value*60;
+      state.timerEnabled?startTimer():updateTimerUI();
+    });
+
+    el.playBtn.addEventListener("click",startGame);
+    el.resultBtn.addEventListener("click",resultAction);
+    el.ok.addEventListener("click",check3);
+    el.skip.addEventListener("click",skip3);
+    el.input.addEventListener("keydown",e=>e.key==="Enter"&&check3());
+    el.prev.addEventListener("click",prev);
+    el.next.addEventListener("click",next);
+
+    setScreen("start");
+  </script>
+</body>
+</html>
