@@ -80,6 +80,7 @@
       padding:4px 0 8px
     }
     #startScreen .center-stack,#resultScreen .center-stack{transform:translate(38px,-20px)}
+    #screen1 .center-stack{padding-top:18px}
     .start-card,.result-card{
       width:min(800px,92vw);
       padding:clamp(26px,4vw,42px);
@@ -202,6 +203,7 @@
       justify-content:center;
       overflow:visible
     }
+    #screen1 .prompt-card{margin-top:16px;margin-bottom:4px}
     .image-frame{
       width:min(420px,48vw);
       aspect-ratio:1/1;
@@ -231,10 +233,11 @@
       border-radius:18px;
       padding:8px;
       aspect-ratio:1/1;
-      max-width:530px;
+      max-width:500px;
       justify-self:center;
       width:100%
     }
+    #screen1 .img-btn{max-width:470px}
     .text-btn{
       min-height:82px;
       padding:14px 16px;
@@ -258,7 +261,13 @@
       box-shadow:0 0 0 2px rgba(205,97,97,.95),0 0 14px var(--red1),0 0 28px var(--red2),0 0 42px rgba(132,34,34,.42),var(--shadow);
       filter:brightness(1.03)
     }
-    .message{min-height:24px;text-align:center;font-size:18px;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+    .message{
+      min-height:24px;
+      text-align:center;
+      font-size:18px;
+      text-shadow:0 2px 8px rgba(0,0,0,.35)
+    }
+    #screen1 .message{margin-top:-4px;transform:translateY(-6px)}
     .message.good{color:#d7f0aa}
     .message.bad{color:#f0bbbb}
     .answer-input{
@@ -344,6 +353,7 @@
       .score-box,.small-magic-btn{width:100%;min-width:0}
       .image-frame{width:min(320px,68vw)}
       .img-btn{max-width:320px}
+      #screen1 .img-btn{max-width:320px}
       #startScreen .center-stack,#resultScreen .center-stack{transform:none}
     }
     @media (max-width:600px){
